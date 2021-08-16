@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout view="lHh Lpr lff">
     <q-header elevated class="bg-primary text-white" height-hint="98">
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
@@ -8,25 +8,21 @@
           <!-- <q-avatar>
             <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" />
           </q-avatar> -->
-          Simple Invoice App
+          Invoice App
         </q-toolbar-title>
       </q-toolbar>
 
-      <!-- <q-tabs align="left">
-        <q-route-tab to="/page1" label="Edit" />
+      <q-tabs class="bg-accent" align="left">
+        <q-route-tab to="/edit" label="Edit" />
         <q-route-tab to="/page2" label="Preview" />
         <q-route-tab to="/page3" label="History" />
-      </q-tabs> -->
+      </q-tabs>
     </q-header>
 
     <q-drawer
       show-if-above
       v-model="leftDrawerOpen"
       side="left"
-      :mini="miniState"
-      @mouseover="miniState = false"
-      @mouseout="miniState = true"
-      mini-to-overlay
       :width="200"
       :breakpoint="500"
       bordered
@@ -101,7 +97,6 @@ export default {
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
-      miniState: ref(true),
     };
   },
 };
