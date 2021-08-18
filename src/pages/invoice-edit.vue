@@ -42,6 +42,8 @@
                 label="Item Quantity"
                 v-model="itemCard.item.quantity"
               />
+
+              <p class="q-pt-sm">Amount: ${{ itemCard.amount }}</p>
             </q-card-section>
             <q-separator />
 
@@ -105,7 +107,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'Vue';
+import { defineComponent, ref, computed, ComputedRef } from 'Vue';
 import InvoiceContainer from 'src/components/InvoiceContainer.vue';
 import { Item } from 'src/models/item';
 
@@ -125,14 +127,23 @@ export default defineComponent({
     interface ItemCard {
       item: Item;
       isDeleteConfirm: boolean;
-      amount: number;
+      amount: ComputedRef<number>;
     }
+
+    // function computedAmount(index: number) {
+    //   return itemList.value[index].price * itemList.value[index].quantity;
+    // }
+    // const computedAmount = computed((index: number) => {
+    //   return itemList.value[index].price * itemList.value[index].quantity;
+    // });
 
     const itemCardList = ref<Array<ItemCard>>([
       {
         item: itemList.value[0],
         isDeleteConfirm: false,
-        amount: itemList.value[0].price * itemList.value[0].quantity,
+        amount: computed(() => {
+          return itemList.value[0].price * itemList.value[0].quantity;
+        }),
       },
     ]);
 
@@ -143,12 +154,18 @@ export default defineComponent({
         quantity: 1,
       });
 
-      const newAddedItem = itemList.value[itemList.value.length - 1];
+      const newAddedItemIndex = itemList.value.length - 1;
+      const newAddedItem = itemList.value[newAddedItemIndex];
 
       itemCardList.value.push({
         item: newAddedItem,
         isDeleteConfirm: false,
-        amount: newAddedItem.price * newAddedItem.quantity,
+        amount: computed(() => {
+          return (
+            itemList.value[newAddedItemIndex].price *
+            itemList.value[newAddedItemIndex].quantity
+          );
+        }),
       });
     }
 
