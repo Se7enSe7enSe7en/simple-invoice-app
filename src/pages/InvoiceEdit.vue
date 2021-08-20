@@ -27,23 +27,36 @@
                 v-model="itemCard.description"
               />
 
-              <q-input
-                class="q-mt-sm"
-                outlined
-                dense
-                label="Item Price"
-                v-model="itemCard.price"
-              />
+              <div class="row">
+                <q-input
+                  class="q-mt-sm"
+                  outlined
+                  dense
+                  label="Item Price"
+                  v-model="itemCard.price"
+                  style="width: 100px"
+                />
 
-              <q-input
-                class="q-mt-sm"
-                outlined
-                dense
-                label="Item Quantity"
-                v-model="itemCard.quantity"
-              />
+                <div
+                  class="text-primary q-pt-md q-pl-sm q-pr-sm"
+                  style="font-size: 1em"
+                >
+                  ✕
+                </div>
 
-              <p class="q-pt-sm">Amount: ${{ itemCard.amount(index) }}</p>
+                <q-input
+                  class="q-mt-sm"
+                  outlined
+                  dense
+                  label="Item Quantity"
+                  v-model="itemCard.quantity"
+                  style="width: 100px"
+                />
+              </div>
+
+              <p class="q-pt-sm q-pl-sm">
+                Amount: {{ itemCard.amount(index) }}
+              </p>
             </q-card-section>
             <q-separator />
 
@@ -101,13 +114,21 @@
             Add
           </q-btn>
         </div>
+
+        <div
+          class="row"
+          style="width: 100%; display: flex; justify-content: flex-end"
+        >
+          Total:
+          <div style="min-width: 130px; text-align: right">{{ total }}</div>
+        </div>
       </form>
     </InvoiceContainer>
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref } from 'Vue';
+import { defineComponent, ref, Ref, computed, ComputedRef } from 'Vue';
 import InvoiceContainer from 'src/components/InvoiceContainer.vue';
 import { Item } from 'src/models/item';
 
@@ -118,14 +139,20 @@ export default defineComponent({
   setup() {
     interface ItemCard extends Item {
       isDeleteConfirm: boolean;
-      amount(index: number): number;
+      amount: Ref;
+      // amount(index: number): number;
     }
 
-    function computedAmount(index: number) {
-      return (
+    // function computedAmount(index: number) {
+    //   return (
+    //     itemCardList.value[index].price * itemCardList.value[index].quantity
+    //   );
+    // }
+
+    const computedAmount = ref(
+      (index: number) =>
         itemCardList.value[index].price * itemCardList.value[index].quantity
-      );
-    }
+    );
 
     const itemCardList: Ref<Array<ItemCard>> = ref<Array<ItemCard>>([
       {
@@ -156,11 +183,20 @@ export default defineComponent({
         !itemCardList.value[index].isDeleteConfirm;
     }
 
+    function total(): number {
+      return itemCardList.value.reduce(
+        (accumulator: number, current: ItemCard) =>
+          accumulator + current.amount.value,
+        0
+      );
+    }
+
     return {
       addItem,
       deleteItem,
       toggleDeleteConfirmation,
       itemCardList,
+      total,
     };
   },
 });
