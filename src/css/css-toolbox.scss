@@ -1,0 +1,14 @@
+@function adapt-text-color($color) {
+  @if (lightness($color) > 50) {
+    @return #000;
+    // @return black;
+  } @else {
+    @return #fff;
+    // @return white;
+  }
+}
+
+@mixin dynamic-text-color($color) {
+  background: $color;
+  color: adapt-text-color($color);
+}

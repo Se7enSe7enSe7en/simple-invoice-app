@@ -14,7 +14,7 @@
 
       <q-tabs class="bg-accent" align="left">
         <q-route-tab to="/edit" label="Edit" />
-        <q-route-tab to="/page2" label="Preview" />
+        <q-route-tab to="/preview" label="Preview" />
         <q-route-tab to="/page3" label="History" />
       </q-tabs>
     </q-header>

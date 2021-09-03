@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="bg-grey-4">
+  <q-page class="bg-grey-4" padding>
     <InvoiceContainer>
       <form @submit="submit">
         <h5>From</h5>
@@ -55,7 +55,7 @@
               </div>
 
               <p class="q-pt-sm q-pl-sm">
-                Amount: {{ itemCard.amount(index) }}
+                Amount: ₱{{ itemCard.amount(index) }}
               </p>
             </q-card-section>
             <q-separator />
@@ -120,7 +120,7 @@
           style="width: 100%; display: flex; justify-content: flex-end"
         >
           Total:
-          <div style="min-width: 130px; text-align: right">{{ total }}</div>
+          <div style="min-width: 130px; text-align: right">₱{{ total }}</div>
         </div>
       </form>
     </InvoiceContainer>
@@ -140,14 +140,9 @@ export default defineComponent({
     interface ItemCard extends Item {
       isDeleteConfirm: boolean;
       amount: Ref;
+      // amount: Ref<(index: number) => number>;
       // amount(index: number): number;
     }
-
-    // function computedAmount(index: number) {
-    //   return (
-    //     itemCardList.value[index].price * itemCardList.value[index].quantity
-    //   );
-    // }
 
     const computedAmount = ref(
       (index: number) =>
@@ -183,13 +178,13 @@ export default defineComponent({
         !itemCardList.value[index].isDeleteConfirm;
     }
 
-    function total(): number {
-      return itemCardList.value.reduce(
+    const total = computed(() =>
+      itemCardList.value.reduce(
         (accumulator: number, current: ItemCard) =>
-          accumulator + current.amount.value,
+          accumulator + current.quantity * current.price,
         0
-      );
-    }
+      )
+    );
 
     return {
       addItem,
