@@ -14,7 +14,7 @@
 // 1. must have an interface
 // 2. a sample object that follows object_B's interface
 // this function returns an object that follows interface_B
-export function unextendObject(unextendFrom: object, unextendTo: object) {
+export function unextendObject(unextendFrom: any, unextendTo: any) {
     const allowed: string[] = Object.keys(unextendTo);
     // console.log('allowed: ', allowed); // DEBUG
     const filtered = Object.keys(unextendFrom)
@@ -25,7 +25,8 @@ export function unextendObject(unextendFrom: object, unextendTo: object) {
         [key]: unextendFrom[key],
         };
     }, {});
-
+    // console.log('TYPEOF FILTERERD: ', typeof filtered); // DEBUG
+    // console.log('TYPEOF unextendFrom: ', typeof unextendFrom); // DEBUG
     // console.log('FILTERED', filtered); // DEBUG
     return filtered;
 }

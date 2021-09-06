@@ -77,7 +77,7 @@
               />
             </div>
 
-            <p class="q-pt-sm q-pl-sm">Amount: ₱{{ itemCard.amount(index) }}</p>
+            <p class="q-pt-sm q-pl-sm">Amount: {{ itemCard.amount(index) }}</p>
           </q-card-section>
           <q-separator />
 
@@ -141,7 +141,9 @@
         style="width: 100%; display: flex; justify-content: flex-end"
       >
         Total:
-        <div style="min-width: 130px; text-align: right">₱{{ total }}</div>
+        <div style="min-width: 130px; text-align: right">
+          {{ invoice.total }}
+        </div>
       </div>
     </form>
 
@@ -163,30 +165,38 @@
       </div>
       <div class="bg-blue-2 row justify-between">
         <div class="bg-green-4">
-          <h7>From:</h7>
-          <h6>Jedden Mendoza</h6>
-          <p>jedden.mendoza@gmail.com</p>
+          <h6 class="q-my-none">From:</h6>
+          <h5 class="q-mt-sm q-mb-md">
+            <!-- <b>Jedden Mendoza</b> -->
+            <b>{{ invoice.company.name }}</b>
+          </h5>
+          <!-- <p>jedden.mendoza@gmail.com</p> -->
+          <p>{{ invoice.company.email }}</p>
         </div>
 
         <div class="bg-pink-4">
-          <h7>Bill to:</h7>
-          <h6>Dwayne "The Rock" Johnson</h6>
-          <p>stone@gmail.com</p>
+          <h6 class="q-my-none">Bill to:</h6>
+          <h5 class="q-mt-sm q-mb-md">
+            <!-- <b>Dwayne "The Rock" Johnson</b> -->
+            <b>{{ invoice.client.name }} </b>
+          </h5>
+          <!-- <p>stone@gmail.com</p> -->
+          <p>{{ invoice.client.email }}</p>
         </div>
-
-        <div class="bg-teal-3">
-          <div class="bg-teal-9">
-            <b>INVOICE</b>
-            <p>INV0001</p>
-          </div>
-          <div class="bg-teal-7">
-            <b>DATE</b>
-            <p>23 Aug 2021</p>
-          </div>
-          <div class="bg-teal-5">
-            <b>DUE</b>
-            <p>On Receipt</p>
-          </div>
+      </div>
+      <div class="bg-teal-3">
+        <div class="bg-teal-9">
+          <b>INVOICE ID:</b>
+          <!-- <p>INV0001</p> -->
+          <p>{{ invoice.id }}</p>
+        </div>
+        <div class="bg-teal-7">
+          <b>DATE:</b>
+          <p>23 Aug 2021</p>
+        </div>
+        <div class="bg-teal-5">
+          <b>DUE:</b>
+          <p>On Receipt</p>
         </div>
       </div>
       <!-- <q-table
@@ -216,16 +226,32 @@
           </tr>
         </tbody>
       </q-markup-table>
+      <div class="bg-red-5 row justify-end">
+        <!-- <div class="text-h6 text-right">Total: {{ invoice.total }}</div> -->
+        <!-- <tr>
+          <td class="text-right">Total</td>
+          <td class="text-h6 text-right">{{ invoice.total }}</td>
+        </tr> -->
+        <div class="col-shrink text-h6 text-right bg-red-3">Total:</div>
+        <div
+          class="col-auto text-h6 text-right bg-red-2"
+          style="min-width: 30%"
+        >
+          {{ invoice.total }}
+        </div>
+      </div>
     </div>
   </InvoiceContainer>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref, computed, watch, watchEffect } from 'Vue';
-import InvoiceContainer from 'src/components/InvoiceContainer.vue';
-import { Item } from 'src/models/item';
-import { Invoice } from 'src/models/invoice';
+import { defineComponent, ref, Ref, computed, watchEffect } from 'Vue';
+import InvoiceContainer from 'src/modules/InvoiceGenerator/components/InvoiceContainer.vue';
+import { Item } from 'src/modules/InvoiceGenerator/models/item';
+import { Invoice } from 'src/modules/InvoiceGenerator/models/invoice';
 import { unextendObject } from 'src/utils/typeScriptToolBox';
+import { Money } from 'src/modules/InvoiceGenerator/models/money';
+// import currency from 'currency.js';
 
 export default defineComponent({
   components: {
@@ -248,6 +274,9 @@ export default defineComponent({
     const computedAmount = ref(
       (index: number) =>
         itemCardList.value[index].price * itemCardList.value[index].quantity
+      // itemCardList.value[index].price.multiply(
+      //   itemCardList.value[index].quantity
+      // )
     );
 
     const itemCardList: Ref<Array<ItemCard>> = ref<Array<ItemCard>>([
@@ -283,53 +312,82 @@ export default defineComponent({
     const total = computed(() =>
       itemCardList.value.reduce(
         (accumulator: number, current: ItemCard) =>
-          accumulator + current.quantity * current.price,
+          accumulator + current.price * current.quantity,
         0
       )
     );
 
-    // function itemCardToItem(itemCard: ItemCard): Item {
-    //   return {
-    //     description: itemCard.description,
-    //     price: itemCard.price,
-    //     quantity: itemCard.quantity,
-    //   };
-    // }
+    function itemCardToItem(itemCard: ItemCard): Item {
+      return {
+        description: itemCard.description,
+        price: itemCard.price,
+        quantity: itemCard.quantity,
+      };
+    }
+
+    const itemList = ref(() =>
+      itemCardList.value.map((itemCard) => itemCardToItem(itemCard))
+    );
 
     // const itemList = ref(
     //   itemCardList.value.map((itemCard) => itemCardToItem(itemCard))
     // );
-    const itemList = computed(() =>
-      // itemCardList.value.map((itemCard) => itemCardToItem(itemCard))
-      itemCardList.value.map((itemCard) =>
-        unextendObject(itemCard, {
-          description: '',
-          quantity: '',
-          price: '',
-        })
-      )
-    );
-    // const itemList = ref(() =>
-    //   itemCardList.value.map((itemCard) => itemCardToItem(itemCard))
+
+    // const itemList = computed(() =>
+    //   // itemCardList.value.map((itemCard) => itemCardToItem(itemCard))
+    //   itemCardList.value.map((itemCard) =>
+    //     unextendObject(itemCard, {
+    //       description: '',
+    //       quantity: 0,
+    //       price: 0,
+    //     })
+    //   )
     // );
 
-    const invoice = ref<Invoice>({} as Invoice);
+    const invoice = ref<Invoice>({
+      id: Date.now(),
+      company: {
+        id: Date.now(),
+        name: '',
+        email: '',
+      },
+      client: {
+        id: Date.now(),
+        name: '',
+        email: '',
+      },
+      itemList: itemList.value(),
+      total: total.value,
+    });
+
+    // watchEffect(() => {
+    //   invoice.value = {
+    //     id: Date.now(),
+    //     company: {
+    //       id: Date.now(),
+    //       name: '',
+    //       email: '',
+    //     },
+    //     client: {
+    //       id: Date.now(),
+    //       name: '',
+    //       email: '',
+    //     },
+    //     itemList: itemList.value,
+    //     total: total.value,
+    //   };
+    // });
+
+    // function currencyFormat(n: number) {
+    //   return new Intl.NumberFormat('es-US', {
+    //     style: 'currency',
+    //     currency: 'PHP',
+    //   }).format(n);
+    // }
 
     watchEffect(() => {
-      invoice.value = {
-        id: Date.now(),
-        company: {
-          id: Date.now(),
-          name: '',
-          email: '',
-        },
-        client: {
-          id: Date.now(),
-          name: '',
-          email: '',
-        },
-        itemList: itemList.value,
-      };
+      invoice.value.itemList = itemList.value();
+      invoice.value.total = total.value;
     });
 
     return {
@@ -339,7 +397,6 @@ export default defineComponent({
       itemCardList,
       total,
       invoice,
-      itemList,
     };
   },
 });

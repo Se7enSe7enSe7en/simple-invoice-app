@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'Vue';
-import Invoice from 'src/components/Invoice.vue';
+import Invoice from 'src/modules/InvoiceGenerator/components/Invoice.vue';
 
 export default defineComponent({
   components: {
