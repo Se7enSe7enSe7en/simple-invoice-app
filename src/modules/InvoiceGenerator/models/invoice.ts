@@ -12,5 +12,5 @@ export interface Invoice {
     discount?: number
     shipping?: number
     tax?: number
-    total: number
+    total: string
 }

@@ -55,8 +55,8 @@
                 class="q-mt-sm"
                 outlined
                 dense
-                label="Item Price"
-                v-model="itemCard.price"
+                label="Price"
+                v-model="itemCard.price.value"
                 style="width: 100px"
               />
 
@@ -71,7 +71,7 @@
                 class="q-mt-sm"
                 outlined
                 dense
-                label="Item Quantity"
+                label="Quantity"
                 v-model="itemCard.quantity"
                 style="width: 100px"
               />
@@ -218,11 +218,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in invoice.itemList" :key="item.description">
+          <tr v-for="(item, index) in invoice.itemList" :key="item.description">
             <td class="text-left">{{ item.description }}</td>
-            <td class="text-right">{{ item.price }}</td>
+            <td class="text-right">{{ item.price.moneyFormat() }}</td>
             <td class="text-right">{{ item.quantity }}</td>
-            <td class="text-right">{{ item.price * item.quantity }}</td>
+            <td class="text-right">{{ computedAmount(index) }}</td>
           </tr>
         </tbody>
       </q-markup-table>
@@ -245,7 +245,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref, computed, watchEffect } from 'Vue';
+import {
+  defineComponent,
+  ref,
+  Ref,
+  computed,
+  ComputedRef,
+  watchEffect,
+} from 'Vue';
 import InvoiceContainer from 'src/modules/InvoiceGenerator/components/InvoiceContainer.vue';
 import { Item } from 'src/modules/InvoiceGenerator/models/item';
 import { Invoice } from 'src/modules/InvoiceGenerator/models/invoice';
@@ -266,23 +273,37 @@ export default defineComponent({
   setup() {
     interface ItemCard extends Item {
       isDeleteConfirm: boolean;
-      amount: Ref;
+      amount(index: number): string;
+      // amount: Ref;
       // amount: Ref<(index: number) => number>;
       // amount(index: number): number;
     }
 
-    const computedAmount = ref(
-      (index: number) =>
-        itemCardList.value[index].price * itemCardList.value[index].quantity
-      // itemCardList.value[index].price.multiply(
-      //   itemCardList.value[index].quantity
-      // )
-    );
+    function computedAmount(index: number) {
+      return new Money(
+        itemCardList.value[index].price.value *
+          itemCardList.value[index].quantity
+      ).moneyFormat();
+    }
+
+    // const computedAmount = computed(
+    //   (index: number) =>
+    //     itemCardList.value[index].price.value *
+    //     itemCardList.value[index].quantity
+    // );
+    // const computedAmount = ref(
+    //   (index: number) =>
+    //     itemCardList.value[index].price.value *
+    //     itemCardList.value[index].quantity
+    //   // itemCardList.value[index].price.multiply(
+    //   //   itemCardList.value[index].quantity
+    //   // )
+    // );
 
     const itemCardList: Ref<Array<ItemCard>> = ref<Array<ItemCard>>([
       {
         description: '',
-        price: 0,
+        price: new Money(),
         quantity: 1,
         isDeleteConfirm: false,
         amount: computedAmount,
@@ -292,7 +313,7 @@ export default defineComponent({
     function addItem() {
       itemCardList.value.push({
         description: '',
-        price: 0,
+        price: new Money(),
         quantity: 1,
         isDeleteConfirm: false,
         amount: computedAmount,
@@ -309,12 +330,15 @@ export default defineComponent({
         !itemCardList.value[index].isDeleteConfirm;
     }
 
-    const total = computed(() =>
-      itemCardList.value.reduce(
-        (accumulator: number, current: ItemCard) =>
-          accumulator + current.price * current.quantity,
-        0
-      )
+    const total = computed(
+      () =>
+        new Money(
+          itemCardList.value.reduce(
+            (accumulator: number, current: ItemCard) =>
+              accumulator + current.price.value * current.quantity,
+            0
+          )
+        )
     );
 
     function itemCardToItem(itemCard: ItemCard): Item {
@@ -335,12 +359,13 @@ export default defineComponent({
 
     // const itemList = computed(() =>
     //   // itemCardList.value.map((itemCard) => itemCardToItem(itemCard))
-    //   itemCardList.value.map((itemCard) =>
-    //     unextendObject(itemCard, {
-    //       description: '',
-    //       quantity: 0,
-    //       price: 0,
-    //     })
+    //   itemCardList.value.map(
+    //     (itemCard) =>
+    //       unextendObject(itemCard, {
+    //         description: '',
+    //         quantity: 0,
+    //         price: new Money(),
+    //       })
     //   )
     // );
 
@@ -357,7 +382,7 @@ export default defineComponent({
         email: '',
       },
       itemList: itemList.value(),
-      total: total.value,
+      total: total.value.moneyFormat(),
     });
 
     // watchEffect(() => {
@@ -387,7 +412,9 @@ export default defineComponent({
 
     watchEffect(() => {
       invoice.value.itemList = itemList.value();
-      invoice.value.total = total.value;
+      invoice.value.total = total.value.moneyFormat();
+      // const m = new Money(total.value.value).moneyFormat();
+      // console.log(m);
     });
 
     return {
@@ -397,6 +424,7 @@ export default defineComponent({
       itemCardList,
       total,
       invoice,
+      computedAmount,
     };
   },
 });

@@ -1,5 +1,5 @@
 export class Money {
-    private _value: number;
+    private _value
     get value(): number {
         return this._value
     }
@@ -7,7 +7,7 @@ export class Money {
         this._value = theValue
     }
 
-    private _currency: string
+    private _currency
     get currency(): string {
         return this._currency
     }
@@ -15,16 +15,9 @@ export class Money {
         this._currency = theCurrency
     }
 
-    constructor(theValue?: number | string) {
-        this._value = 0
-        this._currency = '$'
-
-        if (theValue) {
-            this._value = +theValue
-            this._currency = '$'
-            console.log('value: ', this._value);
-            console.log('currency: ', this._currency);
-        }
+    constructor(thisValue = 0, thisCurrency = 'PHP') {
+        this._value = thisValue
+        this._currency = thisCurrency
     }
 
     moneyFormat() {
